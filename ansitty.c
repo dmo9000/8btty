@@ -29,9 +29,13 @@ void sysbus_rungraphics()
 
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
-//    gfx_opengl_main(640, 384, "68K");
-    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68K");
-    while (1) { }
+		/* MULTIPLIER SET HERE */
+    gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 1, "8btty");
+    while (1) { 
+			/* don't busy wait */
+			pthread_yield();
+			usleep(10000);
+			}
 }
 
 
@@ -80,9 +84,8 @@ int ansitty_init()
     pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
 
 
-    //gfx_opengl_main((width*8), (height*16), "68000");
     //gfx_opengl_expose();
-    canvas->is_dirty = true;
+    //canvas->is_dirty = true;
     return 0;
 
 }
