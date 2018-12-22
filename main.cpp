@@ -26,6 +26,7 @@ void *idle_thread_routine(void *)
 char *envp[] =
 {
     "LANG=C",
+    "DISPLAY=:0",
     "HOME=/home/dan",
     "PATH=/bin:/usr/bin",
     "TZ=UTC0",
@@ -96,11 +97,12 @@ int main(int argc, char *argv[])
             }
             ran_input = true;
         } else {
-						/* also might get "resource temporarily unavailable" here */
-						if (errno == EIO) {
-		            perror("pty_read");
-								running = false;
-								}
+            /* also might get "resource temporarily unavailable" here */
+            if (errno == EIO) {
+                perror("pty_read");
+                running = false;
+                assert(NULL);
+            }
         }
 
         //printf("buflen = %u\n", j);
