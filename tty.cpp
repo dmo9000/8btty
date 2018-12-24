@@ -21,15 +21,14 @@ int TTY::Init()
 
 	std::cout << "TTY::Init()" << std::endl;
 	ansitty_init();
-
+	return 1;
 }
 
 int TTY::putc(unsigned char c)
 {
 
 	ansitty_putc(c);
-	return 0;
-
+	return 1;
 }
 
 int TTY::puts(const char *s)
@@ -40,6 +39,7 @@ int TTY::puts(const char *s)
 			s++;
 			}
 
+	return 0;
 }
 
 int TTY::getchar()
