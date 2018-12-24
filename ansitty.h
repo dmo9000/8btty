@@ -5,6 +5,8 @@
 int ansitty_init();
 int ansitty_putc(unsigned char c);
 int ansitty_set_process_fd(int fd);
+bool ansitty_setcursorphase(bool cursorstate);
+int ansitty_updatecursor();
 
 /* belongs to gfx_opengl.c, but we'll leave it here for now */
 

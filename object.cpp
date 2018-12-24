@@ -3,7 +3,7 @@
 Object::Object()
 {
 
-	cout << "Object created" << endl;
+    cout << "Object created" << endl;
 
 
 }
@@ -11,6 +11,6 @@ Object::Object()
 Object::~Object()
 {
 
-	cout << "Object destroyed" << endl;
+    cout << "Object destroyed" << endl;
 
 }

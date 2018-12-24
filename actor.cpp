@@ -3,7 +3,7 @@
 Actor::Actor()
 {
 
-	std::cout << "Actor created" << std::endl;
+    std::cout << "Actor created" << std::endl;
 
 
 }
@@ -11,6 +11,6 @@ Actor::Actor()
 Actor::~Actor()
 {
 
-	std::cout << "Actor destroyed" << std::endl;
+    std::cout << "Actor destroyed" << std::endl;
 
 }

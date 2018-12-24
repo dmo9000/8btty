@@ -21,6 +21,7 @@ extern uint16_t current_y;
 uint16_t last_x;
 uint16_t last_y;
 extern bool allow_clear;
+bool cursor_phase = false;
 
 extern int process_fd;
 pthread_t graphics_thread;
@@ -30,9 +31,9 @@ pthread_t graphics_thread;
 
 int ansitty_set_process_fd(int fd)
 {
-		printf("ansitty_set_process_fd(%d)\n", fd);
-		process_fd = fd;
-		return 1;
+    printf("ansitty_set_process_fd(%d)\n", fd);
+    process_fd = fd;
+    return 1;
 }
 
 void sysbus_rungraphics()
@@ -40,13 +41,13 @@ void sysbus_rungraphics()
 
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
-		/* MULTIPLIER SET HERE */
+    /* MULTIPLIER SET HERE */
     gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 1, "8btty");
-    while (1) { 
-			/* don't busy wait */
-			pthread_yield();
-			usleep(10000);
-			}
+    while (1) {
+        /* don't busy wait */
+        pthread_yield();
+        usleep(10000);
+    }
 }
 
 
@@ -55,14 +56,14 @@ int ansitty_init()
     ANSIRaster *r = NULL;
     char *font_filename = NULL;
     printf("ansitty_init()\r\n");
-		
+
     font_filename = "bmf/8x8.bmf";
     myfont = bmf_load(font_filename);
     if (!myfont) {
         perror("bmf_load");
         exit(1);
     }
-		fflush(NULL);
+    fflush(NULL);
 
     allow_clear = true;
 
@@ -136,6 +137,12 @@ int ansitty_scroll(ANSICanvas *canvas)
     return 0;
 }
 
+void ansitty_setcursorphase(bool state)
+{
+    cursor_phase = state;
+    return;
+}
+
 int ansitty_drawcursor(bool state)
 {
 
@@ -150,13 +157,28 @@ int ansitty_drawcursor(bool state)
 
 }
 
+int ansitty_updatecursor()
+{
+
+    if (canvas->cursor_enabled) {
+        if (cursor_phase) {
+            gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, true);
+            canvas->is_dirty = true;
+        } else {
+            gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, false);
+            canvas->is_dirty = true;
+        }
+    }
+    return 1;
+}
+
 int ansitty_putc(unsigned char c)
 {
     unsigned char outbuffer[2];
     last_x = current_x;
     last_y = current_y;
 
-		//fprintf(stderr, "ansitty_putc(%c)\n", c);
+    //fprintf(stderr, "ansitty_putc(%c)\n", c);
 
     if (!c) return 0;
 
