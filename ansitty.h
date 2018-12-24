@@ -4,10 +4,11 @@
 
 int ansitty_init();
 int ansitty_putc(unsigned char c);
-int tty_getbuflen();
+int ansitty_set_process_fd(int fd);
 
 /* belongs to gfx_opengl.c, but we'll leave it here for now */
 
+int tty_getbuflen();
 int input_character();
 
 #endif /* __ANSITTY_H__ */

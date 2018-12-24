@@ -2,7 +2,6 @@
 #include <cassert>
 #include <iostream>
 #include <pty.h>
-//#include "actor.h"
 #include "tty.h"
 #include "unistd.h"
 #include <unistd.h>
@@ -37,6 +36,26 @@ char *envp[] =
     0
 };
 
+static void
+change_term_size (int fd, int x, int y)
+{
+
+    struct winsize win;
+		printf("1) change_term_size(%d, %u, %u)\n", fd, x, y);
+    if (ioctl (fd, TIOCGWINSZ, &win))
+        return;
+    if (y && y >24)
+        win.ws_row = y;
+    else
+        win.ws_row = 24;
+    if (x && x>80)
+        win.ws_col = x;
+    else
+        win.ws_col = 80;
+    ioctl (fd, TIOCSWINSZ, &win);
+		printf("2) change_term_size(%u, %u)\n", win.ws_col, win.ws_row);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +72,9 @@ int main(int argc, char *argv[])
 
     sleep(1);
 
+		/* see here for notes on resizing: 
+				https://www.ohse.de/uwe/software/resize.c.html */
+
     pthread_create( &idle_thread, NULL, idle_thread_routine, NULL);
 
     int masterFd;
@@ -62,8 +84,7 @@ int main(int argc, char *argv[])
     int procId = forkpty(&masterFd, NULL, NULL,  NULL);
     if( procId == 0 ) {
         setenv("TERM", "ansi", 1);
-        //myTTY->puts("(in child process...)\n");
-        //   fprintf(stderr, "(in child process)\r\n");
+				//change_term_size(0, 80, 24); 
         execve( args[0], args, envp);
         /* TODO error handling if that didn't work */
     }
@@ -74,6 +95,9 @@ int main(int argc, char *argv[])
     int flags = fcntl(masterFd, F_GETFL, 0);
     fcntl(masterFd, F_SETFL, flags | O_NONBLOCK);
 
+		change_term_size(masterFd, 80, 24);
+
+		ansitty_set_process_fd(masterFd);
     running = true;
 
     ssize_t rd = 0;
@@ -82,6 +106,8 @@ int main(int argc, char *argv[])
     bool ran_input = false;
     bool ran_output = false;
     bool asleep = false;
+
+		ansi_setdebug(true);
 
     while (running) {
         ran_input = false;

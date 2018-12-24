@@ -20,9 +20,20 @@ extern uint16_t current_x;
 extern uint16_t current_y;
 uint16_t last_x;
 uint16_t last_y;
-
 extern bool allow_clear;
+
+extern int process_fd;
 pthread_t graphics_thread;
+
+/* maximum length of a single ANSI sequence */
+#define MAX_SEQUENCE		sizeof(uint8_t)
+
+int ansitty_set_process_fd(int fd)
+{
+		printf("ansitty_set_process_fd(%d)\n", fd);
+		process_fd = fd;
+		return 1;
+}
 
 void sysbus_rungraphics()
 {
@@ -83,9 +94,6 @@ int ansitty_init()
 
     pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
 
-
-    //gfx_opengl_expose();
-    //canvas->is_dirty = true;
     return 0;
 
 }
@@ -122,13 +130,6 @@ int ansitty_scroll(ANSICanvas *canvas)
     /* force refresh of entire canvas */
     canvas_reindex(canvas);
 
-//    SLOW METHOD
-//    gfx_opengl_clear();
-//    gfx_opengl_canvas_render(canvas, myfont);
-
-
-//    FAST METHOD - not working
-//
     gfx_opengl_hwscroll();
 
     canvas->is_dirty = true;
@@ -162,7 +163,6 @@ int ansitty_putc(unsigned char c)
         if ((current_x % TAB_WIDTH)) {
             gfx_opengl_render_cursor(canvas, myfont, (current_x % 80),  current_y + (current_x / 80), false);
             current_x += (TAB_WIDTH- (current_x % TAB_WIDTH));
-            //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
             return 0;
         }
     }

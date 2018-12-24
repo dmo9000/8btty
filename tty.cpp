@@ -53,3 +53,9 @@ int TTY::hasinput()
 {
 	return tty_getbuflen();
 }
+
+int TTY::set_debug(bool debugstate)
+{
+	return ansi_setdebug(debugstate);
+
+}
