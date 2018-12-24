@@ -156,6 +156,8 @@ int ansitty_putc(unsigned char c)
     last_x = current_x;
     last_y = current_y;
 
+		//fprintf(stderr, "ansitty_putc(%c)\n", c);
+
     if (!c) return 0;
 
     if (c == '\t') {

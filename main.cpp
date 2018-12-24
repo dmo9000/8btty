@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     bool ran_output = false;
     bool asleep = false;
 
-		ansi_setdebug(true);
+		//ansi_setdebug(true);
 
     while (running) {
         ran_input = false;
