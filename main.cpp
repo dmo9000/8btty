@@ -91,8 +91,7 @@ int main(int argc, char *argv[])
     pthread_create( &idle_thread, NULL, idle_thread_routine, NULL);
 
     int masterFd;
-    char* args[] = {"/bin/bash", "-i", NULL };
-    //char* args[] = {"/bin/bash",  NULL };
+    char*  args[] = {"/bin/bash", "-i", NULL };
     setenv("TERM", "ansi", 1);
     int procId = forkpty(&masterFd, NULL, NULL,  NULL);
     if( procId == 0 ) {
