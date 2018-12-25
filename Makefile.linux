@@ -10,7 +10,7 @@ LFLAGS = $(WARNINGS) -lGL -lGLU -lglut -lm -pthread -lutil
 #OGL_OBJS=../ansiutils/gfx_opengl.o ../ansiutils/bmf.o ../ansiutils/libansicanvas.a ../ansiutils/ansistate.o
 OGL_OBJS=../ansiutils/gfx_opengl.o ../ansiutils/bmf.o ../ansiutils/libansicanvas.a 
 
-all: 8btty
+all: 8x8.h 8btty
 
 clean:
 	rm -rf obj
@@ -20,6 +20,9 @@ clean:
 
 obj:
 	mkdir obj
+
+8x8.h:	bmf/8x8.bmf
+	xxd -i bmf/8x8.bmf > 8x8.h 
 
 main.o: main.cpp
 	$(CXX) $(CFLAGS) -c main.cpp
@@ -33,7 +36,7 @@ tty.o: tty.cpp
 ansitty.o: ansitty.c
 	$(CC) $(CFLAGS) -c ansitty.c
 
-8btty: main.o object.o $(OGL_OBJS) ansitty.o tty.o
+8btty: 8x8.h main.o object.o $(OGL_OBJS) ansitty.o tty.o
 	$(CXX) $(LFLAGS)  main.o object.o tty.o $(OGL_OBJS) ansitty.o -o 8btty  
 
 

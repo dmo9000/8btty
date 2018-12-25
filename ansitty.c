@@ -7,6 +7,7 @@
 #include "ansicanvas.h"
 #include "gfx_opengl.h"
 #include "bmf.h"
+#include "8x8.h"
 
 ANSICanvas *canvas = NULL;
 BitmapFont *myfont = NULL;
@@ -61,6 +62,8 @@ int ansitty_init()
     printf("ansitty_init()\r\n");
 
     font_filename = "bmf/8x8.bmf";
+
+		//myfont = bmf_embedded(bmf_8x8_bmf);
     myfont = bmf_load(font_filename);
     if (!myfont) {
         perror("bmf_load");
@@ -133,7 +136,7 @@ int ansitty_scroll(ANSICanvas *canvas)
     tty_y = canvas->lines -1;
     /* force refresh of entire canvas */
     canvas_reindex(canvas);
-
+		gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, false);
     gfx_opengl_hwscroll();
 
     canvas->is_dirty = true;
@@ -315,6 +318,7 @@ void output_character(char c)
         cy++;
         if (cy > 23 ) {
             /* hardware scroll required */
+						gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, false);
             gfx_opengl_hwscroll();
             cy = 23;
         }
@@ -326,6 +330,7 @@ void output_character(char c)
     }
     if (cy > 23 ) {
         /* hardware scroll required */
+				gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, false);
         gfx_opengl_hwscroll();
         cy = 23;
     }
