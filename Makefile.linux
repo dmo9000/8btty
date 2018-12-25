@@ -33,7 +33,7 @@ tty.o: tty.cpp
 ansitty.o: ansitty.c
 	$(CC) $(CFLAGS) -c ansitty.c
 
-8btty: main.o object.o actor.o $(OGL_OBJS) ansitty.o tty.o
-	$(CXX) $(LFLAGS)  main.o object.o actor.o tty.o $(OGL_OBJS) ansitty.o -o 8btty  
+8btty: main.o object.o $(OGL_OBJS) ansitty.o tty.o
+	$(CXX) $(LFLAGS)  main.o object.o tty.o $(OGL_OBJS) ansitty.o -o 8btty  
 
 
