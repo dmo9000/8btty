@@ -40,4 +40,5 @@ ansitty.o: ansitty.c
 8btty: 8x8.h main.o object.o $(OGL_OBJS) ansitty.o tty.o
 	$(CXX) $(LFLAGS)  main.o object.o tty.o $(OGL_OBJS) ansitty.o -o 8btty  
 
-
+install:
+	sudo cp 8btty /usr/bin/8btty

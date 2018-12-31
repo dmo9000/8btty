@@ -123,18 +123,26 @@ int ansitty_scroll(ANSICanvas *canvas)
     /* FIXME: TODO: free old head, there is a memory leak here */
     /* TODO: move this to a ansi_raster_delete() function in libansicanvas */
 
-    assert(d->bytes);
-    assert(d->chardata);
-    assert(d->fgcolors);
-    assert(d->bgcolors);
-    assert(d->attribs);
+    assert(d);
 
-    assert(raster_delete(d));
 
-    canvas->lines --;
-    //tty_y --;
-    tty_y = canvas->lines -1;
-    /* force refresh of entire canvas */
+ //   if (!d->bytes) {
+				/* whoops! what's going on? extend the raster */
+	//			raster_extend_length_to(d, 80);
+		//		}
+
+        assert(d->bytes);
+        assert(d->chardata);
+        assert(d->fgcolors);
+        assert(d->bgcolors);
+        assert(d->attribs);
+        assert(raster_delete(d));
+
+        canvas->lines --;
+        //tty_y --;
+        tty_y = canvas->lines -1;
+        /* force refresh of entire canvas */
+
     canvas_reindex(canvas);
     gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, false);
     gfx_opengl_hwscroll();
