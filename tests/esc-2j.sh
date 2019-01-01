@@ -1,0 +1,1 @@
+echo -ne '\x1b\x5b\x32\x4a''FOO'
