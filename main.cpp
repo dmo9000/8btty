@@ -119,7 +119,9 @@ int main(int argc, char *argv[])
     bool ran_output = false;
     bool asleep = false;
 
-    //ansi_setdebug(true);
+		if (argc > 1) {
+	    ansi_setdebug(true);
+			}
 
     while (running) {
         ran_input = false;
