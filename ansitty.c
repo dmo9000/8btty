@@ -228,11 +228,9 @@ int ansitty_putc(unsigned char c)
 
     /* process output */
 
-		/*
     fprintf(stderr, 
 					"output='%c', current_x=%d, current_y=%d, width=%d,scroll_limit=%d\n",
            c, current_x, current_y, width, canvas->scroll_limit);
-		*/
 
 
     if (!ansi_to_canvas(canvas, (unsigned char *) &outbuffer, 1, 0)) {
@@ -251,17 +249,17 @@ int ansitty_putc(unsigned char c)
     }
 
     if (cursor_has_moved) {
+			/*
         if ((current_x / width) > 0) {
             current_y += (current_x / width);
             current_x = (current_x % width);
-            /* 
 							fprintf(stderr, 
 								"+++ natural wrap (current_x=%d, current_y=%d)\n",
                     current_x, current_y);
-						*/
 												
             cursor_has_moved = false;
         }
+			*/
 
 
         if (cursor_has_moved) {
@@ -275,6 +273,11 @@ int ansitty_putc(unsigned char c)
                 current_y --;
                 last_y --;
             }
+						if (current_y >= canvas->scroll_limit) {
+							fprintf(stderr, 
+							"+++ WARNING: scroll limit exceeed! current_x=%u, current_y=%u\n",
+								current_x, current_y);
+							}
             assert(current_y < canvas->scroll_limit);
         }
     }
@@ -289,7 +292,7 @@ int ansitty_putc(unsigned char c)
         canvas->is_dirty = true;
     } else {
         /* regular output */
-				if (cursor_has_moved) {
+				if (cursor_has_moved || last_y < canvas->scroll_limit) {
 	        if (c != '\n' && c!= '\r') {
 							if (last_y < canvas->scroll_limit) {
 	  	          gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
