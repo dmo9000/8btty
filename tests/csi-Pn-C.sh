@@ -1,3 +1,5 @@
+echo -ne "\x1b\x5b""2J"
+echo -ne "\x1b\x5b""1;1H"
 echo -ne "FOO"
 echo -ne "\x1b\x5b""C"
 echo -ne "BAR"
@@ -18,4 +20,8 @@ echo -ne "FOO"
 echo -ne "\x1b\x5b""3C"
 echo -ne "BAR"
 echo ""
-
+# FIXME: this seems to trigger wrapping bug in ansitty.c
+echo -ne "\x1b\x5b""7;1H"
+echo -ne "FOO"
+echo -ne "\x1b\x5b""200C"
+echo -ne "BAR"
