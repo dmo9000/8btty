@@ -16,7 +16,7 @@ typedef struct _ansitty {
 												} ANSITTY;
 
 ANSITTY* ansitty_init();
-int ansitty_putc(unsigned char c);
+int ansitty_putc(ANSITTY *device, unsigned char c);
 int ansitty_set_process_fd(int fd);
 void ansitty_setcursorphase(bool state);
 int ansitty_updatecursor();

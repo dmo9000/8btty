@@ -27,7 +27,7 @@ int TTY::Init()
 int TTY::putc(unsigned char c)
 {
 
-    ansitty_putc(c);
+    ansitty_putc(TTYDevice, c);
     return 1;
 }
 

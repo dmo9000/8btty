@@ -33,6 +33,15 @@ pthread_t graphics_thread;
 /* maximum length of a single ANSI sequence */
 #define MAX_SEQUENCE		sizeof(uint8_t)
 
+
+int ansitty_setwindowtitle(char *s)
+{
+
+	fprintf(stderr, "+++ ... ansitty_setwindowtitle(%s)\n", s);
+	gfx_opengl_setwindowtitle(s);
+	return 0;
+}
+
 int ansitty_set_process_fd(int fd)
 {
     printf("ansitty_set_process_fd(%d)\n", fd);
@@ -58,42 +67,44 @@ void *sysbus_rungraphics()
 
 ANSITTY *new_ansitty(uint16_t w, uint16_t h)
 {
-	ANSITTY *New_TTY = NULL;
+    ANSITTY *New_TTY = NULL;
 
-	fprintf(stderr, "--- new_ansitty(%u, %u)\n", w, h);
+    fprintf(stderr, "--- new_ansitty(%u, %u)\n", w, h);
 
-	if (!w || !h) {
-			return NULL;
-			}
+    if (!w || !h) {
+        return NULL;
+    }
 
-	New_TTY = malloc(sizeof(ANSITTY));
+    New_TTY = malloc(sizeof(ANSITTY));
 
-	if (!New_TTY) {
-			return NULL;
-			}
+    if (!New_TTY) {
+        return NULL;
+    }
 
-	New_TTY->w = w;
-	New_TTY->h = h;
+    New_TTY->w = w;
+    New_TTY->h = h;
 
-	return New_TTY;
+    return New_TTY;
 
 }
 
 ANSITTY* ansitty_init()
 {
-		ANSITTY *New_TTY = NULL;
+    ANSITTY *New_TTY = NULL;
     ANSIRaster *r = NULL;
     char *font_filename = NULL;
     printf("ansitty_init()\r\n");
 
-		New_TTY = new_ansitty(width, height);
+    New_TTY = new_ansitty(width, height);
 
 //    font_filename = "bmf/8x8.bmf";
     //myfont = bmf_load(font_filename);
 
-		if (!New_TTY) {
-				return NULL;
-				}
+    if (!New_TTY) {
+        return NULL;
+    }
+
+		ansi_setwindowtitlecallback(ansitty_setwindowtitle);
 
     myfont = bmf_embedded(bmf_8x8_bmf);
     if (!myfont) {
@@ -104,12 +115,12 @@ ANSITTY* ansitty_init()
     allow_clear = true;
     canvas = new_canvas();
 
-		if (!canvas) {
-				free(New_TTY);
-				return NULL;
-				}
+    if (!canvas) {
+        free(New_TTY);
+        return NULL;
+    }
 
-		New_TTY->canvas = canvas;
+    New_TTY->canvas = canvas;
 
     /* very specific settings needed to make the canvas behave as a TTY */
 
@@ -221,20 +232,20 @@ int ansitty_updatecursor()
     return 1;
 }
 
-int ansitty_putc(unsigned char c)
+int ansitty_putc(ANSITTY *device, unsigned char c)
 {
     static bool cursor_has_moved = false;
     unsigned char outbuffer[2];
     last_x = current_x;
     last_y = current_y;
 
-		/*
+    /*
     if (c >=32 && c < 128) {
-        fprintf(stderr, "ansitty_putc(%c)\n", c);
+    fprintf(stderr, "ansitty_putc(%c)\n", c);
     } else {
-        fprintf(stderr, "ansitty_putc(0x%02x)\n", c);
+    fprintf(stderr, "ansitty_putc(0x%02x)\n", c);
     }
-		*/
+    */
 
     if (!c) return 0;
 
@@ -270,59 +281,59 @@ int ansitty_putc(unsigned char c)
 
     /* process output */
 
-	
-		if (current_y >= canvas->scroll_limit) {
-				ansitty_scroll(canvas);
-				current_y --;
-				last_y --;
-				} //else {
 
-		/*
-		while (current_x >= CONSOLE_WIDTH) {
-				current_x -= CONSOLE_WIDTH;
-				current_y ++;
-				}
-    		last_x = current_x;
-		    last_y = current_y;
-		}
-		*/
+    if (current_y >= canvas->scroll_limit) {
+        ansitty_scroll(canvas);
+        current_y --;
+        last_y --;
+    } //else {
 
-
-
-    if (c >=32 && c < 128) {
-        fprintf(stderr,
-        "  output='%c',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
-           c, current_x, current_y, width, canvas->scroll_limit);
-    } else {
-        fprintf(stderr,
-        "  output='0x%02x',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
-         c, current_x, current_y, width, canvas->scroll_limit);
+    /*
+    while (current_x >= CONSOLE_WIDTH) {
+    		current_x -= CONSOLE_WIDTH;
+    		current_y ++;
+    		}
+    	last_x = current_x;
+        last_y = current_y;
     }
+    */
 
+
+    if (device->debug_flags & ANSITTY_DEBUG_OUTPUT) {
+        if (c >=32 && c < 128) {
+            fprintf(stderr,
+                    "  output='%c',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
+                    c, current_x, current_y, width, canvas->scroll_limit);
+        } else {
+            fprintf(stderr,
+                    "  output='0x%02x',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
+                    c, current_x, current_y, width, canvas->scroll_limit);
+        }
+    }
 
     if (!ansi_to_canvas(canvas, (unsigned char *) &outbuffer, 1, 0)) {
         printf("+++ ansitty error! (%s,%d)\n", __FILE__, __LINE__);
         assert(NULL);
     }
 
-		if (last_x == current_x && last_y == current_y) {
-			cursor_has_moved = false;
-			} else {
-			cursor_has_moved = true;
-			}
+    if (last_x == current_x && last_y == current_y) {
+        cursor_has_moved = false;
+    } else {
+        cursor_has_moved = true;
+    }
 
-		if (cursor_has_moved) {
-	
+    if (cursor_has_moved) {
 
-		if (canvas->repaint_entire_canvas) {
-	    gfx_opengl_canvas_render(canvas, myfont);
-  	  canvas->repaint_entire_canvas = false;
-			} else {
-         gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
-			}
-		}
 
-		canvas->is_dirty = true;	
+        if (canvas->repaint_entire_canvas) {
+            gfx_opengl_canvas_render(canvas, myfont);
+            canvas->repaint_entire_canvas = false;
+        } else {
+            gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
+        }
+    }
+
+    canvas->is_dirty = true;
 
     /* reflow start */
 
