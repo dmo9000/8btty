@@ -1,6 +1,10 @@
 #ifndef __ANSITTY_H__
 #define __ANSITTY_H__
 
+typedef struct _ansitty {
+												uint16_t width;
+												uint16_t height;
+												} ANSITTY;
 
 int ansitty_init();
 int ansitty_putc(unsigned char c);
@@ -12,5 +16,7 @@ int ansitty_updatecursor();
 
 int tty_getbuflen();
 int input_character();
+
+
 
 #endif /* __ANSITTY_H__ */

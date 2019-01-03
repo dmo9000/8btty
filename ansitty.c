@@ -192,7 +192,13 @@ int ansitty_putc(unsigned char c)
     last_x = current_x;
     last_y = current_y;
 
-    //fprintf(stderr, "ansitty_putc(%c)\n", c);
+		/*
+    if (c >=32 && c < 128) {
+        fprintf(stderr, "ansitty_putc(%c)\n", c);
+    } else {
+        fprintf(stderr, "ansitty_putc(0x%02x)\n", c);
+    }
+		*/
 
     if (!c) return 0;
 
@@ -228,11 +234,21 @@ int ansitty_putc(unsigned char c)
 
     /* process output */
 
-		/*
-    fprintf(stderr, 
-					"output='%c', current_x=%d, current_y=%d, width=%d,scroll_limit=%d\n",
+		if (current_y >= canvas->scroll_limit) {
+				ansitty_scroll(canvas);
+				current_y --;
+				last_y --;
+				}
+
+    if (c >=32 && c < 128) {
+        fprintf(stderr,
+        "  output='%c',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
            c, current_x, current_y, width, canvas->scroll_limit);
-		*/
+    } else {
+        fprintf(stderr,
+        "  output='0x%02x',current_x=%d,current_y=%d,width=%d,scroll_limit=%d\n",
+         c, current_x, current_y, width, canvas->scroll_limit);
+    }
 
 
     if (!ansi_to_canvas(canvas, (unsigned char *) &outbuffer, 1, 0)) {
@@ -240,68 +256,86 @@ int ansitty_putc(unsigned char c)
         assert(NULL);
     }
 
+		if (last_x == current_x && last_y == current_y) {
+			cursor_has_moved = false;
+			} else {
+			cursor_has_moved = true;
+			}
+
+		if (canvas->repaint_entire_canvas) {
+	    gfx_opengl_canvas_render(canvas, myfont);
+  	  canvas->repaint_entire_canvas = false;
+			} else {
+         gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
+			}
+
+		canvas->is_dirty = true;	
+
     /* reflow start */
 
+    /*
     if (current_x == last_x && current_y == last_y) {
-        //fprintf(stderr, "*** cursor did not move ***\n");
+        fprintf(stderr, "*** cursor did not move ***\n");
         cursor_has_moved = false;
     } else {
-        //fprintf(stderr, "*** cursor DID move ***\n");
+        fprintf(stderr, "*** cursor DID move ***\n");
         cursor_has_moved = true;
     }
+    */
 
-    if (cursor_has_moved) {
-			/*
-        if ((current_x / width) > 0) {
-            current_y += (current_x / width);
-            current_x = (current_x % width);
-							fprintf(stderr, 
-								"+++ natural wrap (current_x=%d, current_y=%d)\n",
-                    current_x, current_y);
-												
-            cursor_has_moved = false;
-        }
-			*/
+    /*
+    if ((current_x / width) > 0) {
+    current_y += (current_x / width);
+    current_x = (current_x % width);
+    				fprintf(stderr,
+    					"+++ natural wrap (current_x=%d, current_y=%d)\n",
+            current_x, current_y);
 
-        if (cursor_has_moved) {
-            if (!(current_y < canvas->scroll_limit)) {
-                ansitty_scroll(canvas);
-								/*
-                fprintf(stderr, 
-									"+++ natural scroll (current_x=%d, current_y=%d)\n",
-                        current_x, current_y);
-								*/
-                current_y --;
-                last_y --;
-            }
-						if (current_y >= canvas->scroll_limit) {
-							fprintf(stderr, 
-							"+++ WARNING: scroll limit exceeed! current_x=%u, current_y=%u\n",
-								current_x, current_y);
-							}
-            assert(current_y < canvas->scroll_limit);
-        }
+    cursor_has_moved = false;
     }
+    */
+
+    /*
+    if (cursor_has_moved) {
+    if (!(current_y < canvas->scroll_limit)) {
+        ansitty_scroll(canvas);
+        fprintf(stderr,
+        	"+++ natural scroll (current_x=%d, current_y=%d)\n",
+        current_x, current_y);
+        current_y --;
+        last_y --;
+    }
+    if (current_y >= canvas->scroll_limit) {
+        fprintf(stderr,
+                "+++ WARNING: scroll limit exceeed! current_x=%u, current_y=%u\n",
+                current_x, current_y);
+    }
+    assert(current_y < canvas->scroll_limit);
+    }
+
+    */
 
     /* reflow end */
 
-    /* TODO: repaint damaged region only */
+    /*
+    // TODO: repaint damaged region only
 
     if (canvas->repaint_entire_canvas) {
         gfx_opengl_canvas_render(canvas, myfont);
         canvas->repaint_entire_canvas = false;
         canvas->is_dirty = true;
     } else {
-        /* regular output */
-				if (cursor_has_moved || last_y < canvas->scroll_limit) {
-	        if (c != '\n' && c!= '\r') {
-							if (last_y < canvas->scroll_limit) {
-	  	          gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
-								}
-    	    }
-				}
+        // regular output
+        if (cursor_has_moved || last_y < canvas->scroll_limit) {
+            if (c != '\n' && c!= '\r') {
+                if (last_y < canvas->scroll_limit) {
+                    gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
+                }
+            }
+        }
         canvas->is_dirty = true;
     }
+    	*/
     return 0;
 }
 

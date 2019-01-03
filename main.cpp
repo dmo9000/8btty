@@ -42,9 +42,15 @@ char *envp[] =
     "HOME=/home/dan",
     "PATH=/bin:/usr/bin",
     "TZ=UTC0",
-    "USER=beelzebub",
-    "LOGNAME=tarzan",
-    "TERM=ansi",
+    "USER=dan",
+    "LOGNAME=dan",
+/* Funnily enough, bash seems to auto-wrap at line 79 when TERM=ansi 
+	 tested with gnome-terminal and xterm, which specify 'xterm-256color'
+	 respectively */
+//    "TERM=ansi",
+//			"TERM=xterm-256color",
+			"TERM=xterm",
+//		"TERM=vt100",
     "PS1=[\\u@\\h \\W]\\$ ",
     0
 };
