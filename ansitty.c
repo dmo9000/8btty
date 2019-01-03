@@ -228,9 +228,11 @@ int ansitty_putc(unsigned char c)
 
     /* process output */
 
+		/*
     fprintf(stderr, 
 					"output='%c', current_x=%d, current_y=%d, width=%d,scroll_limit=%d\n",
            c, current_x, current_y, width, canvas->scroll_limit);
+		*/
 
 
     if (!ansi_to_canvas(canvas, (unsigned char *) &outbuffer, 1, 0)) {
@@ -260,7 +262,6 @@ int ansitty_putc(unsigned char c)
             cursor_has_moved = false;
         }
 			*/
-
 
         if (cursor_has_moved) {
             if (!(current_y < canvas->scroll_limit)) {
