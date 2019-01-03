@@ -20,7 +20,7 @@ int TTY::Init()
 {
 
     std::cout << "TTY::Init()" << std::endl;
-    ansitty_init();
+    TTYDevice = (ANSITTY *) ansitty_init();
     return 1;
 }
 

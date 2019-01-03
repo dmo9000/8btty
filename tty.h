@@ -16,10 +16,11 @@ public:
 	int getchar();
 	int hasinput();
 	int set_debug(bool debugstate);
-
+		
 protected:
 
 private:
+	ANSITTY *TTYDevice;
 
 };
 

@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "ansistate.h"
 #include "ansicanvas.h"
+#include "ansitty.h"
 #include "gfx_opengl.h"
 #include "bmf.h"
 #include "8x8.h"
@@ -55,25 +56,60 @@ void *sysbus_rungraphics()
 }
 
 
-int ansitty_init()
+ANSITTY *new_ansitty(uint16_t w, uint16_t h)
 {
+	ANSITTY *New_TTY = NULL;
+
+	fprintf(stderr, "--- new_ansitty(%u, %u)\n", w, h);
+
+	if (!w || !h) {
+			return NULL;
+			}
+
+	New_TTY = malloc(sizeof(ANSITTY));
+
+	if (!New_TTY) {
+			return NULL;
+			}
+
+	New_TTY->w = w;
+	New_TTY->h = h;
+
+	return New_TTY;
+
+}
+
+ANSITTY* ansitty_init()
+{
+		ANSITTY *New_TTY = NULL;
     ANSIRaster *r = NULL;
     char *font_filename = NULL;
     printf("ansitty_init()\r\n");
 
-    font_filename = "bmf/8x8.bmf";
+		New_TTY = new_ansitty(width, height);
+
+//    font_filename = "bmf/8x8.bmf";
+    //myfont = bmf_load(font_filename);
+
+		if (!New_TTY) {
+				return NULL;
+				}
 
     myfont = bmf_embedded(bmf_8x8_bmf);
-    //myfont = bmf_load(font_filename);
     if (!myfont) {
         perror("couldn't get bmf font: ");
         exit(1);
     }
     fflush(NULL);
-
     allow_clear = true;
-
     canvas = new_canvas();
+
+		if (!canvas) {
+				free(New_TTY);
+				return NULL;
+				}
+
+		New_TTY->canvas = canvas;
 
     /* very specific settings needed to make the canvas behave as a TTY */
 
@@ -101,7 +137,7 @@ int ansitty_init()
 
     pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
 
-    return 0;
+    return New_TTY;
 
 }
 
@@ -234,11 +270,24 @@ int ansitty_putc(unsigned char c)
 
     /* process output */
 
+	
 		if (current_y >= canvas->scroll_limit) {
 				ansitty_scroll(canvas);
 				current_y --;
 				last_y --;
+				} //else {
+
+		/*
+		while (current_x >= CONSOLE_WIDTH) {
+				current_x -= CONSOLE_WIDTH;
+				current_y ++;
 				}
+    		last_x = current_x;
+		    last_y = current_y;
+		}
+		*/
+
+
 
     if (c >=32 && c < 128) {
         fprintf(stderr,
@@ -262,12 +311,16 @@ int ansitty_putc(unsigned char c)
 			cursor_has_moved = true;
 			}
 
+		if (cursor_has_moved) {
+	
+
 		if (canvas->repaint_entire_canvas) {
 	    gfx_opengl_canvas_render(canvas, myfont);
   	  canvas->repaint_entire_canvas = false;
 			} else {
          gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
 			}
+		}
 
 		canvas->is_dirty = true;	
 
